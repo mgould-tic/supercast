@@ -53,14 +53,13 @@ class tryTo:
 class Supervisor:
     """Represents a supervisor process instance"""
     def __init__(self, supervisorid=None, host=None, rpcport=-1, env=None, subEnv="", dockerId="", clusterId="", returnProxy="", state=None, pid=0,
-                 configError = None, configAdded = [], configUpdated = [], configRemoved = [], since=None, motd=""):
+                 configerror = None, configadded = [], configupdated = [], configremoved = [], since=None, motd=""):
         # Note: changing member variable names will change the json object property names used in the server messages
         self.supervisorid = supervisorid
         self.host = host
         self.rpcport = rpcport
         self.env = env
         self.subEnv = subEnv
-        self.sub_env = subEnv
         self.supervisorversion = VERSION
         self.os = platform.platform()
         self.osversion = platform.version()
@@ -73,10 +72,10 @@ class Supervisor:
         self.statename = states.getSupervisorStateDescription(state)
         self.supervisorpid = pid
         self.since = since or time.time() * 1000
-        self.configError = configError
-        self.configAdded = configAdded
-        self.configUpdated = configUpdated
-        self.configRemoved = configRemoved
+        self.configerror = configerror
+        self.configadded = configadded
+        self.configupdated = configupdated
+        self.configremoved = configremoved
         self.motd = motd
         self.updateTime = time.time() * 1000
 
@@ -101,10 +100,10 @@ class Supervisor:
                ", statename=" + self.statename + \
                ", supervisorpid=" + str(self.supervisorpid) + \
                ", since=" + str(self.since) + \
-               ", configError=" + self.configError + \
-               ", configAdded=" + str(self.configAdded) + \
-               ", configUpdated=" + str(self.configUpdated) + \
-               ", configRemoved=" + str(self.configRemoved) + \
+               ", configerror=" + self.configerror + \
+               ", configadded=" + str(self.configadded) if self.configadded else "" + \
+               ", configupdated=" + str(self.configupdated) if self.configupdated else "" + \
+               ", configremoved=" + str(self.configremoved) if self.configremoved else "" + \
                "}"
 
 
@@ -117,7 +116,6 @@ class Process:
         self.host = host
         self.env = env
         self.subEnv = subEnv
-        self.sub_env = subEnv
         self.since = time.time() * 1000
         self.updateTime = time.time() * 1000
 
@@ -284,10 +282,10 @@ class Supercast:
         self.logger = logger
         self.supervisorid = supervisord.options.identifier
         self.connection = None
-        self.configError = None
-        self.configAdded = []
-        self.configUpdated = []
-        self.configRemoved = []
+        self.configerror = None
+        self.configadded = []
+        self.configupdated = []
+        self.configremoved = []
         self.since = None
         self.repubSecs = 59 * 60  # every 1 hours
         self.lastRepub = 0
@@ -382,18 +380,18 @@ class Supercast:
             self.supervisord.options.process_config(do_usage=False)
         except ValueError as e:
             msg = str(e.message)
-            if self.configError != msg:
-                self.configError = msg
-                self.configAdded, self.configUpdated, self.configRemoved = [], [], []
+            if self.configerror != msg:
+                self.configerror = msg
+                self.configadded, self.configupdated, self.configremoved = [], [], []
                 return True
             return False
         diffs = [[g.name for g in x] for x in self.supervisord.diff_to_active()]
-        if diffs != [self.configAdded, self.configUpdated, self.configRemoved]:
-            self.configAdded, self.configUpdated, self.configRemoved = diffs
-            self.configError = None
+        if diffs != [self.configadded, self.configupdated, self.configremoved]:
+            self.configadded, self.configupdated, self.configremoved = diffs
+            self.configerror = None
             return True
-        if self.configError is not None:
-            self.configError = None
+        if self.configerror is not None:
+            self.configerror = None
             return True
         return False
 
@@ -457,7 +455,7 @@ class Supercast:
         mood = self.supervisord.options.mood
         if mood == states.SupervisorStates.RESTARTING:
             mood = states.SupervisorStates.SHUTDOWN
-        s = Supervisor(self.supervisorid, self.host, port, self.env, self.subEnv, self.getDockerId(), self.clusterId, self.returnProxy, mood, self.supervisord.options.get_pid(), self.configError, self.configAdded, self.configUpdated, self.configRemoved, self.since, self.getMotd())
+        s = Supervisor(self.supervisorid, self.host, port, self.env, self.subEnv, self.getDockerId(), self.clusterId, self.returnProxy, mood, self.supervisord.options.get_pid(), self.configerror, self.configadded, self.configupdated, self.configremoved, self.since, self.getMotd())
         self.connection.updateSupervisor(s)
 
     def getHttpPort(self):
@@ -514,8 +512,10 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
+def make_hazelvisor(*args, **kwargs):
+    make_supercast(*args, **kwargs)
 
-def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="", returnProxy="", logfile="supercast.log"):
+def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="", returnProxy="", logfile="hazelvisor.log"):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -551,7 +551,7 @@ def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="
         host = socket.gethostname().split(".")[0]
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
-        supercast = Supercast(supervisord, host, environment.strip(), sub_env.strip(), urls.strip(), urlIndex, clusterId.strip(), returnProxy.strip(), logger)
+        supercast = Supercast(supervisord, host, environment.strip(), sub_env.strip(), urls, urlIndex, clusterId.strip(), returnProxy.strip(), logger)
 
     # return a dummy rpc plugin
     return rpc
