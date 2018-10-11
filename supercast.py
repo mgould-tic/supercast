@@ -548,7 +548,7 @@ def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="
         logger.info("Supercast plugin starting.")
 
         # Create supercast itself
-        host = socket.gethostname().split(".")[0]
+        host = socket.gethostname()
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
         supercast = Supercast(supervisord, host, environment.strip(), sub_env.strip(), urls, urlIndex, clusterId.strip(), returnProxy.strip(), logger)
