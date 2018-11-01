@@ -1,6 +1,7 @@
 # Supercast plugin for supervisor
 # place this file somewhere on the python path
 # add something like this to the supervisor.conf (only the first 3 lines are required)
+# You will have to change this to fit the specific environment
 
 #  [rpcinterface:supercast]
 #  supervisor.rpcinterface_factory = supercast.make_supercast
@@ -146,6 +147,7 @@ class Process:
             self.exitcodes = str(pconfig.exitcodes)
             self.stdout_logfile = pconfig.stdout_logfile
             self.stderr_logfile = pconfig.stderr_logfile
+            self.environmentVars = pconfig.environment
 
     def resolveUsername(self, id):
         if id is not None:
