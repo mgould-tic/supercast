@@ -514,7 +514,7 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
-def make_supercast(supervisord, urls, environment="dev", subEnv="", clusterId="", returnProxy="", logfile="supercast.log", fixSignalableStates=True):
+def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", returnproxy="", logfile="supercast.log", fixsignalablestates=True):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -550,9 +550,9 @@ def make_supercast(supervisord, urls, environment="dev", subEnv="", clusterId=""
         host = socket.gethostname()
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
-        supercast = Supercast(supervisord, host, environment.strip(), subEnv.strip(), urls, urlIndex, clusterId.strip(), returnProxy.strip(), logger)
+        supercast = Supercast(supervisord, host, environment.strip(), subenv.strip(), urls, urlIndex, clusterid.strip(), returnproxy.strip(), logger)
 
-    if fixSignalableStates:
+    if fixsignalablestates:
         rpcinterface.SupervisorNamespaceRPCInterface.signalProcess = signalProcessProperly
 
     # return a dummy rpc plugin
