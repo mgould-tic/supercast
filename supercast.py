@@ -514,10 +514,7 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
-def make_hazelvisor(*args, **kwargs):
-    make_supercast(*args, **kwargs)
-
-def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="", returnProxy="", logfile="hazelvisor.log"):
+def make_supercast(supervisord, urls, environment="dev", subEnv="", clusterId="", returnProxy="", logfile="supercast.log"):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -553,7 +550,7 @@ def make_supercast(supervisord, urls, environment="dev", sub_env="", clusterId="
         host = socket.gethostname()
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
-        supercast = Supercast(supervisord, host, environment.strip(), sub_env.strip(), urls, urlIndex, clusterId.strip(), returnProxy.strip(), logger)
+        supercast = Supercast(supervisord, host, environment.strip(), subEnv.strip(), urls, urlIndex, clusterId.strip(), returnProxy.strip(), logger)
 
     # return a dummy rpc plugin
     return rpc
