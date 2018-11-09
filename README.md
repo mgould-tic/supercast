@@ -63,16 +63,15 @@ If the connection breaks it will automatically reconnect to the next configured 
 The server can display the current state of all supervisors and processes in one place and can control processes
 by connecting back to the individual supervisor xml-rpc interfaces.
 
-The reference server implementation has a number of identical redundant servers connected by a shared memory grid.  
-This allows updates to be received from supervisors on any server and the data is shared with all other servers in the cluster.
+The reference management server implementation has a number of identical redundant processes connected by a shared memory grid.  
+This allows updates to be received by any server process and the data is shared with all others in the cluster.
 
 Normally the server can detect disconnections and mark that particular host as lost unless a shutdown status update was received.  
-When the supervisor re-connects to the cluster it is marked as running again.  Supervisors that don't connect for a long time can
-be deleted unless they are not expected to be normally present.
+When the supervisor re-connects to the cluster it is marked as running again.  Data for supervisors that don't connect for a long time canbe deleted unless they are expected to be normally present.
 
-If a server cluster node goes down then typically all supervisors will reconnect to other nodes within a few seconds
+If a management server cluster node is shutdown then typically all supervisors will reconnect to other nodes within a few seconds
 and users will not notice. 
-To allow for stuck or dead supervisor data to be cleaned up the supercast plugin will re-send all state at least every hour.
+To allow for stuck or dead supervisor data to be cleaned up the supercast plugin re-sends all state at least every hour.
 The servers can then timestamp each update and will purge any data that has not been updated for longer than this.
 
 
@@ -99,7 +98,8 @@ example message:
     "subEnv": "", 
     "statename": "RUNNING", 
     "state": 1, 
-    "host": "londondev1.company.com", 
+    "host": "londondev1", 
+    "fqdn": "londondev1.company.com"
     "rpcport": 9009, 
     "supervisorversion": "3.3.1", 
     "arch": "x86_64", 
@@ -142,7 +142,7 @@ example message:
     "autostart": true, 
     "stderr_logfile": null, 
     "stop": 1538650026988.152, 
-    "host": "londondev1.company.com", 
+    "host": "londondev1", 
     "spawnerr": "", 
     "exitcodes": "[0, 2]", 
     "supervisorid": "londondev1.company.com", 
