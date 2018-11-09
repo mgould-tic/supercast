@@ -14,20 +14,20 @@ Also add the websocket-client module and make it available.
     pip install websocket-client
 ```
 
-Then add the following to the supervisor.conf (only the first 3 lines are required)
+Then add the following to the supervisor.conf (only the first 3 lines are required - the others optional)
 ```
 [rpcinterface:supercast]
 supervisor.rpcinterface_factory = supercast.make_supercast
 urls=ws://frontend1.company.com:12345/supervisor-updates,ws://frontend1.company.com:12345/supervisor-updates
 environment=Production
-subEnv=SpecialOps
-clusterId=cluster1
-returnProxy=proxy1.company.com:8080
+subenv=SpecialOps
+clusterid=cluster1
+returnproxy=proxy1.company.com:8080
 logfile=supercast.log
 ```
 
-You should also ensure that the `identifier` configured under the `[supervisord]` section in the `supervisor.conf` is 
-unique across your entire infrastructure.
+You *should* also ensure that the `identifier` configured under the `[supervisord]` section in the `supervisor.conf` is 
+unique across your envronment.
 
 ###### urls
 A comma separated list of websocket endpoints which supercast will try to connect to and send status 
