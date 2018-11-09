@@ -1,5 +1,5 @@
 # Supercast
-A Supervisor plugin to push all process details and state changes to a central service via websockets.
+A Supervisor plugin to dynamically push all process details and state changes to a centralised service.
 Allow a single application to monitor and control a huge number of processes across hundreds or thousands of hosts.
 
 ## Usage
