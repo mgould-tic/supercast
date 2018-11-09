@@ -83,12 +83,13 @@ The servers timestamp each update and will purge any data that has not been upda
 Messages from supercast to the websocket server consist of a single json object with 4 possible members.
 
 There are currently no messages sent from the server to the supervisor over the websocket connection.  All control and 
-log tailing is done via the xml-rpc interfaces.
+log tailing is done via the xml-rpc interface.
 
 #### supervisor
 This is the first message sent immediately after connection. It's also sent whenever there are any changes and at
 least once per hour.  
 
+example message:
 ```
 {"supervisor": 
   {
@@ -123,6 +124,7 @@ least once per hour.
 This message is sent once for each process after connection following the supervisor message, when there are changes 
 and at least once per hour.
 
+example message:
 ```
 {"process": 
   {
@@ -153,13 +155,14 @@ and at least once per hour.
     "startretries": 3, 
     "stopwaitsecs": 60, 
     "directory": "/usr/local/myscript", 
-    "stdout_logfile": "/logs/myscript.log"
+    "stdout_logfile": "/logs/myscript.log",
+    "environmentVars": {"key": "value"}
   }
 }
 ```
 
 The supervisorid, host, env and subEnv of the process will match the supervisor message.  Having different values of these
-parameters on processes running under the same supervisor daemon is not currently supported.  They are only repeated
+parameters on processes running under the same supervisor daemon is not currently supported - they are only repeated
 in the process message for convenience.
 
 
