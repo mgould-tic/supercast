@@ -62,20 +62,20 @@ It will then send json messages containing full details of the supervisor daemon
 The messages are sent on connection and repeated whenever any state changes as well as on a regular schedule.
 If the connection breaks it will automatically reconnect to the next configured destination in round-robin fashion.
 
-The server  can display the current state of all supervisors and processes in one place and can control processes
+The server can display the current state of all supervisors and processes in one place and can control processes
 by connecting back to the individual supervisor xml-rpc interfaces.
 
-The reference implementation has a number of identical redundant servers connected by a hazelcast shared memory grid.  
-This allows updates to be received from supervisors on any server and the data is shared with all others in the cluster.
+The reference server implementation has a number of identical redundant servers connected by a shared memory grid.  
+This allows updates to be received from supervisors on any server and the data is shared with all other servers in the cluster.
 
-Normally the server can detect disconnections and mark that particular host as lost.  When the supervisor re-connects to 
-the cluster it is marked as running again.  Supervisors that don't connect for a long time can be deleted unless they
-are not expected to be normally present.
+Normally the server can detect disconnections and mark that particular host as lost unless a shutdown status update was received.  
+When the supervisor re-connects to the cluster it is marked as running again.  Supervisors that don't connect for a long time can
+be deleted unless they are not expected to be normally present.
 
 If a server cluster node goes down then typically all supervisors will reconnect to other nodes within a few seconds
 and users will not notice. 
 To allow for stuck or dead supervisor data to be cleaned up the supercast plugin will re-send all state at least every hour.
-The servers timestamp each update and will purge any data that has not been updated for longer than this.
+The servers can then timestamp each update and will purge any data that has not been updated for longer than this.
 
 
 ### Websocket Messages
