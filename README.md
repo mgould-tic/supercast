@@ -1,8 +1,6 @@
 # Supercast
-A Supervisor plugin to push all process details and state changes to a central service.
-
-Allow a single application to monitor a huge number of processes across hundreds or thousands of hosts.
-
+A Supervisor plugin to push all process details and state changes to a central service via websockets.
+Allow a single application to monitor and control a huge number of processes across hundreds or thousands of hosts.
 
 ## Usage
 
@@ -194,13 +192,13 @@ To load changes to a process config the entire group is stopped, deleted and re-
 
 * Most of the recent changes have been to add more information about the host and processes.  
 It is likely that this trend will continue.
-* Some way to send commands to the supervisor via the websocket connection.  This would avoid the xml-rpc interface 
+* We should add some packaging so that it can be more easily distributed and installed via pip.
+* Some way to send commands to the supervisor via the websocket connection would be very useful.  This would avoid the xml-rpc interface 
 and issues with proxies across network domains and into docker clusters.  
 For clustered servers this will probably involve forwarding commands across the cluster
 to reach the connected node. Streaming log updates may need an alternative route.
-* Code tidy up - This code has worked very well for years
-in our deployment but much of it doesn't follow any recommended python style.
-* checking for config changes could be made more efficient
+* Code tidy up - This code has been in production for years. It has worked very reliably and is believed to be free of any serious bugs.  However it does not conform to any established python style and there is much that could be improved.
+* The automated checking for config changes could be made more efficient
 * We have a huge list of improvements we'd like to make to supervisor itself - but unfortunately very little time
 
 
@@ -210,7 +208,7 @@ Created and maintained by Mike Gould at Tudor from 2016 to present
 
 
 ## Licence
-
+Most likely we would publish this under the Apache 2.0 licence
 
 
 
