@@ -1,8 +1,6 @@
 # Supercast
-A Supervisor plugin to push all process details and state changes to a central service.
-
-Allow a single application to monitor a huge number of processes across hundreds or thousands of hosts.
-
+A Supervisor plugin to dynamically push all process details and state changes to a centralised service.
+Allow a single application to monitor and control a huge number of processes across hundreds or thousands of hosts.
 
 ## Usage
 
@@ -14,20 +12,20 @@ Also add the websocket-client module and make it available.
     pip install websocket-client
 ```
 
-Then add the following to the supervisor.conf (only the first 3 lines are required - the rest have defaults)
+Then add the following to the supervisor.conf (only the first 3 lines are required - the others optional)
 ```
 [rpcinterface:supercast]
 supervisor.rpcinterface_factory = supercast.make_supercast
 urls=ws://frontend1.company.com:12345/supervisor-updates,ws://frontend1.company.com:12345/supervisor-updates
 environment=Production
-subEnv=SpecialOps
-clusterId=cluster1
-returnProxy=proxy1.company.com:8080
+subenv=SpecialOps
+clusterid=cluster1
+returnproxy=proxy1.company.com:8080
 logfile=supercast.log
 ```
 
-You should also ensure that the `identifier` configured under the `[supervisord]` section in the `supervisor.conf` is 
-unique across your entire infrastructure.
+You *should* also ensure that the `identifier` configured under the `[supervisord]` section in the `supervisor.conf` is 
+unique across your envronment.
 
 ###### urls
 A comma separated list of websocket endpoints which supercast will try to connect to and send status 
@@ -65,16 +63,15 @@ If the connection breaks it will automatically reconnect to the next configured 
 The server can display the current state of all supervisors and processes in one place and can control processes
 by connecting back to the individual supervisor xml-rpc interfaces.
 
-The reference server implementation has a number of identical redundant servers connected by a shared memory grid.  
-This allows updates to be received from supervisors on any server and the data is shared with all other servers in the cluster.
+The reference management server implementation has a number of identical redundant processes connected by a shared memory grid.  
+This allows updates to be received by any server process and the data is shared with all others in the cluster.
 
 Normally the server can detect disconnections and mark that particular host as lost unless a shutdown status update was received.  
-When the supervisor re-connects to the cluster it is marked as running again.  Supervisors that don't connect for a long time can
-be deleted unless they are not expected to be normally present.
+When the supervisor re-connects to the cluster it is marked as running again.  Data for supervisors that don't connect for a long time canbe deleted unless they are expected to be normally present.
 
-If a server cluster node goes down then typically all supervisors will reconnect to other nodes within a few seconds
+If a management server cluster node is shutdown then typically all supervisors will reconnect to other nodes within a few seconds
 and users will not notice. 
-To allow for stuck or dead supervisor data to be cleaned up the supercast plugin will re-send all state at least every hour.
+To allow for stuck or dead supervisor data to be cleaned up the supercast plugin re-sends all state at least every hour.
 The servers can then timestamp each update and will purge any data that has not been updated for longer than this.
 
 
@@ -101,7 +98,8 @@ example message:
     "subEnv": "", 
     "statename": "RUNNING", 
     "state": 1, 
-    "host": "londondev1.company.com", 
+    "host": "londondev1", 
+    "fqdn": "londondev1.company.com"
     "rpcport": 9009, 
     "supervisorversion": "3.3.1", 
     "arch": "x86_64", 
@@ -144,7 +142,7 @@ example message:
     "autostart": true, 
     "stderr_logfile": null, 
     "stop": 1538650026988.152, 
-    "host": "londondev1.company.com", 
+    "host": "londondev1", 
     "spawnerr": "", 
     "exitcodes": "[0, 2]", 
     "supervisorid": "londondev1.company.com", 
@@ -194,13 +192,13 @@ To load changes to a process config the entire group is stopped, deleted and re-
 
 * Most of the recent changes have been to add more information about the host and processes.  
 It is likely that this trend will continue.
-* Some way to send commands to the supervisor via the websocket connection.  This would avoid the xml-rpc interface 
+* We should add some packaging so that it can be more easily distributed and installed via pip.
+* Some way to send commands to the supervisor via the websocket connection would be very useful.  This would avoid the xml-rpc interface 
 and issues with proxies across network domains and into docker clusters.  
 For clustered servers this will probably involve forwarding commands across the cluster
 to reach the connected node. Streaming log updates may need an alternative route.
-* Code tidy up - This code has worked very well for years
-in our deployment but much of it doesn't follow any recommended python style.
-* checking for config changes could be made more efficient
+* Code tidy up - This code has been in production for years. It has worked very reliably and is believed to be free of any serious bugs.  However it does not conform to any established python style and there is much that could be improved.
+* The automated checking for config changes could be made more efficient
 * We have a huge list of improvements we'd like to make to supervisor itself - but unfortunately very little time
 
 
@@ -210,7 +208,7 @@ Created and maintained by Mike Gould at Tudor from 2016 to present
 
 
 ## Licence
-
+Most likely we would publish this under the Apache 2.0 licence
 
 
 
