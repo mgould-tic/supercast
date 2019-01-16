@@ -514,7 +514,7 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
-def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", returnproxy="", logfile="supercast.log", fixsignalablestates=True):
+def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", returnproxy="", logfile="supercast.log", fixsignalablestates=False):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -522,9 +522,9 @@ def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid=""
     supervisor.rpcinterface_factory = supercast.make_supercast
     urls=ws://frontend1.company.com:12345/supervisor-updates,ws://frontend1.company.com:12345/supervisor-updates
     environment=Production
-    subEnv=SpecialOps
-    clusterId=cluster1
-    returnProxy=proxy1.company.com:8080
+    subenv=SpecialOps
+    clusterid=cluster1
+    returnproxy=proxy1.company.com:8080
     logfile=supercast.log"""
 
     global supercast

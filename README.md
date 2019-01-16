@@ -14,7 +14,7 @@ Also add the websocket-client module and make it available.
     pip install websocket-client
 ```
 
-Then add the following to the supervisor.conf (only the first 3 lines are required)
+Then add the following to the supervisor.conf (only the first 3 lines are required - the rest have defaults)
 ```
 [rpcinterface:supercast]
 supervisor.rpcinterface_factory = supercast.make_supercast
