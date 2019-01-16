@@ -1,6 +1,6 @@
 # Supercast
 A Supervisor plugin to dynamically push all process details and state changes to a centralised service.
-Allow a single application to monitor and control a huge number of processes across hundreds or thousands of hosts.
+This allows a single application to monitor and control a huge number of processes across hundreds or thousands of hosts.
 
 ## Usage
 
@@ -55,24 +55,29 @@ Where to put the Supercast logs.  Defaults to `supercast.log`
 
 ## How it works
 ### Overview
-This plugin will attempt to maintain a websocket connection to one the configured urls.
-It will then send json messages containing full details of the supervisor daemon, the host and each process.
+This plugin will attempt to maintain a websocket connection to one of the configured urls and regularly send json 
+messages containing full details of the supervisor daemon, the host and each process.
 The messages are sent on connection and repeated whenever any state changes as well as on a regular schedule.
 If the connection breaks it will automatically reconnect to the next configured destination in round-robin fashion.
 
-The server can display the current state of all supervisors and processes in one place and can control processes
-by connecting back to the individual supervisor xml-rpc interfaces.
+The server process which is listening to these messages can display the current state of all supervisors and processes 
+in one place. 
+Process control is achieved by connecting back to the individual supervisor xml-rpc interfaces.
 
-The reference management server implementation has a number of identical redundant processes connected by a shared memory grid.  
-This allows updates to be received by any server process and the data is shared with all others in the cluster.
+### Suggested server implementation details
+Oyr reference server implementation (not open source currently) has a number of identical redundant processes 
+connected by a shared memory grid. 
+This allows updates to be received by any server process and the data shared with all others in the cluster.
 
-Normally the server can detect disconnections and mark that particular host as lost unless a shutdown status update was received.  
-When the supervisor re-connects to the cluster it is marked as running again.  Data for supervisors that don't connect for a long time canbe deleted unless they are expected to be normally present.
+Normally the server will be able to detect disconnections and mark that particular host as 'lost' unless a shutdown 
+status update was received. 
+When the supervisor re-connects to the cluster it is marked as running again.  Data for supervisors that don't connect 
+for a long time can be deleted unless they are expected to be normally present.
 
-If a management server cluster node is shutdown then typically all supervisors will reconnect to other nodes within a few seconds
+If a management server node is shutdown then typically all supervisors will reconnect to other nodes within a few seconds
 and users will not notice. 
 To allow for stuck or dead supervisor data to be cleaned up the supercast plugin re-sends all state at least every hour.
-The servers can then timestamp each update and will purge any data that has not been updated for longer than this.
+The servers timestamp each update when received and will purge any data that has not been updated for longer than this.
 
 
 ### Websocket Messages
@@ -183,7 +188,7 @@ This is sent whenever a group is deleted from the supervisor daemon.
 {"deleteGroup": "myscripts" }
 ```
 
-Note that individual processes are never deleted from supervisor.  
+Note that individual processes are never deleted from supervisord.  
 To load changes to a process config the entire group is stopped, deleted and re-added.
 
 
@@ -199,16 +204,20 @@ For clustered servers this will probably involve forwarding commands across the 
 to reach the connected node. Streaming log updates may need an alternative route.
 * Code tidy up - This code has been in production for years. It has worked very reliably and is believed to be free of any serious bugs.  However it does not conform to any established python style and there is much that could be improved.
 * The automated checking for config changes could be made more efficient
-* We have a huge list of improvements we'd like to make to supervisor itself - but unfortunately very little time
+* We have a huge list of improvements we'd like to make to supervisord itself - but unfortunately very little time.
+The most useful would be to trigger starting->running state transitions based on the process log output.
+
 
 
 ## History
 
-Created and maintained by Mike Gould at Tudor from 2016 to present
+Created and maintained by Mike Gould at Tudor https://www.tudor.com/ from 2016 to present.
+
+First made public under the open source GPLv3 Licence in January 2019
 
 
 ## Licence
-Most likely we would publish this under the Apache 2.0 licence
+Published under the GPL v3 licence - see the COPYING file for the licence text.
 
 
 
