@@ -65,7 +65,7 @@ in one place.
 Process control is achieved by connecting back to the individual supervisor xml-rpc interfaces.
 
 ### Suggested server implementation details
-Oyr reference server implementation (not open source currently) has a number of identical redundant processes 
+Our reference server implementation (not open source currently) has a number of identical redundant processes 
 connected by a shared memory grid. 
 This allows updates to be received by any server process and the data shared with all others in the cluster.
 
