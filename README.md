@@ -224,7 +224,7 @@ The most useful would be to trigger starting->running state transitions based on
 
 Created and maintained by Mike Gould at Tudor https://www.tudor.com/ from 2016 to present.
 
-First made public under the open source GPLv3 Licence in January 2019
+First made public under the open source GPLv3 Licence in March 2019
 
 
 ## Licence
