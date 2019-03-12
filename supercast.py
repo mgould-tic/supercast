@@ -19,13 +19,18 @@
 # add something like this to the supervisor.conf (only the first 3 lines are required)
 # You will have to change this to fit the specific environment
 
+#### required config:
 #  [rpcinterface:supercast]
 #  supervisor.rpcinterface_factory = supercast.make_supercast
 #  urls=ws://frontend1.company.com:12345/supervisor-updates,ws://frontend1.company.com:12345/supervisor-updates
 #  environment=Production
+#
+#### following lines optional:
 #  subEnv=SpecialOps
 #  clusterId=cluster1
+#  pod=frontend-pod
 #  returnProxy=proxy1.company.com:8080
+#  exitwithprocess=False
 #  logfile=supercast.log
 #
 
@@ -44,7 +49,7 @@ import json
 import re
 from logging.handlers import RotatingFileHandler
 from supervisor import events, states, rpcinterface
-from supervisor.states import ProcessStates
+from supervisor.states import ProcessStates, SupervisorStates
 from supervisor.options import VERSION
 from supervisor.datatypes import signal_number
 from supervisor.xmlrpc import (
@@ -69,7 +74,7 @@ class tryTo:
 
 class Supervisor:
     """Represents a supervisor process instance"""
-    def __init__(self, supervisorid=None, host=None, rpcport=-1, env=None, subEnv="", dockerId="", clusterId="", returnProxy="", state=None, pid=0,
+    def __init__(self, supervisorid=None, host=None, rpcport=-1, env=None, subEnv="", dockerId="", clusterId="", pod="", returnProxy="", state=None, pid=0,
                  configerror = None, configadded = [], configupdated = [], configremoved = [], since=None, motd=""):
         # Note: changing member variable names will change the json object property names used in the server messages
         self.supervisorid = supervisorid
@@ -84,6 +89,7 @@ class Supervisor:
         self.processor = platform.processor()
         self.dockerId = dockerId
         self.clusterId = clusterId
+        self.pod = pod
         self.returnProxy = returnProxy
         self.state = state
         self.statename = states.getSupervisorStateDescription(state)
@@ -110,7 +116,7 @@ class Supervisor:
                ", arch=" + self.arch + \
                ", dockerId=" + self.dockerId + \
                ", clusterId=" + self.clusterId + \
-               ", dockerId=" + self.dockerId + \
+               ", pod=" + self.pod + \
                ", returnProxy=" + self.returnProxy + \
                ", processor=" + self.processor + \
                ", state=" + str(self.state) + \
@@ -288,7 +294,7 @@ EVENTS_TO_STATES = {
 class Supercast:
     """Publishes supervisor state changes via websockets."""
 
-    def __init__(self, supervisord, host, environment, subEnv, urls, urlIndex, clusterId, returnProxy, logger):
+    def __init__(self, supervisord, host, environment, subEnv, urls, urlIndex, clusterId, pod, returnProxy, exitwithprocess, logger):
         self.supervisord = supervisord
         self.host = host
         self.env = environment
@@ -296,7 +302,9 @@ class Supercast:
         self.urls = urls
         self.urlIndex = urlIndex
         self.clusterId = clusterId
+        self.pod = pod
         self.returnProxy = returnProxy
+        self.exitwithprocess = exitwithprocess
         self.logger = logger
         self.supervisorid = supervisord.options.identifier
         self.connection = None
@@ -341,6 +349,11 @@ class Supercast:
             return
         self.logger.info("Supercast Received process state event " + event.__class__.__name__ + " " + str(event))
         self.updateProcess(event.process, self.eventToState(event), self.eventToPid(event))
+        # In docker we may want to force the whole supervisor daemon to exit when we hit STOPPED, EXITED or FATAL
+        if self.exitwithprocess and self.eventToState(event) in [ProcessStates.EXITED, ProcessStates.STOPPED,
+                                                                 ProcessStates.FATAL]:
+            self.supervisord.options.mood = SupervisorStates.SHUTDOWN
+
 
 
     def onGroupRemove(self, event):
@@ -473,7 +486,7 @@ class Supercast:
         mood = self.supervisord.options.mood
         if mood == states.SupervisorStates.RESTARTING:
             mood = states.SupervisorStates.SHUTDOWN
-        s = Supervisor(self.supervisorid, self.host, port, self.env, self.subEnv, self.getDockerId(), self.clusterId, self.returnProxy, mood, self.supervisord.options.get_pid(), self.configerror, self.configadded, self.configupdated, self.configremoved, self.since, self.getMotd())
+        s = Supervisor(self.supervisorid, self.host, port, self.env, self.subEnv, self.getDockerId(), self.clusterId, self.pod, self.returnProxy, mood, self.supervisord.options.get_pid(), self.configerror, self.configadded, self.configupdated, self.configremoved, self.since, self.getMotd())
         self.connection.updateSupervisor(s)
 
     def getHttpPort(self):
@@ -530,7 +543,7 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
-def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", returnproxy="", logfile="supercast.log", fixsignalablestates=False):
+def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", pod="", returnproxy="", exitwithprocess=False, logfile="supercast.log", fixsignalablestates=True):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -540,6 +553,7 @@ def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid=""
     environment=Production
     subenv=SpecialOps
     clusterid=cluster1
+    pod=frontend-pod
     returnproxy=proxy1.company.com:8080
     logfile=supercast.log"""
 
@@ -566,7 +580,7 @@ def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid=""
         host = socket.gethostname()
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
-        supercast = Supercast(supervisord, host, environment.strip(), subenv.strip(), urls, urlIndex, clusterid.strip(), returnproxy.strip(), logger)
+        supercast = Supercast(supervisord, host, environment.strip(), subenv.strip(), urls, urlIndex, clusterid.strip(), pod.strip(), returnproxy.strip(), exitwithprocess, logger)
 
     if fixsignalablestates:
         rpcinterface.SupervisorNamespaceRPCInterface.signalProcess = signalProcessProperly

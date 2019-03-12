@@ -20,7 +20,9 @@ urls=ws://frontend1.company.com:12345/supervisor-updates,ws://frontend1.company.
 environment=Production
 subenv=SpecialOps
 clusterid=cluster1
+pod=frontend-pod1
 returnproxy=proxy1.company.com:8080
+exitwithprocess=False
 logfile=supercast.log
 ```
 
@@ -46,9 +48,17 @@ Defaults to an empty string.
 Allows you to specify the docker cluster or similar information if required by the server process.  
 Defaults to an empty string.
 
+###### pod
+Allows you to specify the kubenetes pod or similar information if required by the server process.  
+Defaults to an empty string.
+
 ###### returnProxy
 Tells the server process about any proxy required to connect to this supervisor rpc interface.  This may be required
 for supervisors running under some docker configurations.  Defaults to empty string
+
+###### exitwithprocess
+Forces the supervisor daemon to exit when any contained process exits.
+This is useful when supervisor is used only to report status from a containerised process.  Defaults to False
 
 ###### logfile
 Where to put the Supercast logs.  Defaults to `supercast.log`
@@ -113,6 +123,7 @@ example message:
     "os": "Linux-2.6.xx ...", 
     "processor": "x86_64", 
     "clusterId": "",
+    "pod": "",
     "dockerId": "",
     "returnProxy": "",
     "configadded": [], 
