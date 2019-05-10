@@ -123,10 +123,10 @@ class Supervisor:
                ", statename=" + self.statename + \
                ", supervisorpid=" + str(self.supervisorpid) + \
                ", since=" + str(self.since) + \
-               ", configerror=" + self.configerror + \
-               ", configadded=" + str(self.configadded) if self.configadded else "" + \
-               ", configupdated=" + str(self.configupdated) if self.configupdated else "" + \
-               ", configremoved=" + str(self.configremoved) if self.configremoved else "" + \
+               ", configerror=" + self.configerror or "" + \
+               ", configadded=" + str(self.configadded or "") + \
+               ", configupdated=" + str(self.configupdated or "") + \
+               ", configremoved=" + str(self.configremoved or "") + \
                "}"
 
 
@@ -170,6 +170,7 @@ class Process:
             self.stdout_logfile = pconfig.stdout_logfile
             self.stderr_logfile = pconfig.stderr_logfile
             self.environmentVars = pconfig.environment
+            self.subEnv = pconfig.environment.get("DASH_SUB_ENV", subEnv)
 
     def resolveUsername(self, id):
         if id is not None:
@@ -203,7 +204,7 @@ class Connection:
         self.connected = False
         self.died = False
         self.url = url
-        self.ws = websocket.WebSocketApp(url, on_open=self.on_open, on_close=self.on_close, on_error=self.on_error)
+        self.ws = websocket.WebSocketApp(url, on_open=lambda ws: self.on_open(ws), on_close=lambda ws: self.on_close(ws), on_error=lambda ws, e: self.on_error(ws, e))
 
     def start(self):
         # background websocket thread
