@@ -94,7 +94,7 @@ class Supervisor:
         self.state = state
         self.statename = states.getSupervisorStateDescription(state)
         self.supervisorpid = pid
-        self.since = since or time.time() * 1000
+        self.since = (since or time.time()) * 1000
         self.configerror = configerror
         self.configadded = configadded
         self.configupdated = configupdated
@@ -123,7 +123,7 @@ class Supervisor:
                ", statename=" + self.statename + \
                ", supervisorpid=" + str(self.supervisorpid) + \
                ", since=" + str(self.since) + \
-               ", configerror=" + self.configerror or "" + \
+               ", configerror=" + (self.configerror or "") + \
                ", configadded=" + str(self.configadded or "") + \
                ", configupdated=" + str(self.configupdated or "") + \
                ", configremoved=" + str(self.configremoved or "") + \
