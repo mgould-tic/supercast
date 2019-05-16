@@ -170,7 +170,7 @@ class Process:
             self.stdout_logfile = pconfig.stdout_logfile
             self.stderr_logfile = pconfig.stderr_logfile
             self.environmentVars = pconfig.environment
-            self.subEnv = pconfig.environment.get("DASH_SUB_ENV", subEnv)
+            self.subEnv = pconfig.environment.get("SUPER_SUB_ENV", subEnv)
 
     def resolveUsername(self, id):
         if id is not None:
@@ -544,7 +544,7 @@ class DoNothingRpc:
 rpc = DoNothingRpc()
 supercast = None
 
-def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid="", pod="", returnproxy="", exitwithprocess=False, logfile="supercast.log", fixsignalablestates=True):
+def make_supercast(supervisord, urls, environment="dev", subenv="", sub_env="", clusterid="", pod="", returnproxy="", exitwithprocess=False, logfile="supercast.log", fixsignalablestates=True):
     """Sets up supercast and returns a dummy rpc interface.
     expects config parmeters like this:
 
@@ -581,7 +581,7 @@ def make_supercast(supervisord, urls, environment="dev", subenv="", clusterid=""
         host = socket.gethostname()
         urls = urls.split(",")
         urlIndex = random.randint(0, len(urls) - 1)
-        supercast = Supercast(supervisord, host, environment.strip(), subenv.strip(), urls, urlIndex, clusterid.strip(), pod.strip(), returnproxy.strip(), exitwithprocess, logger)
+        supercast = Supercast(supervisord, host, environment.strip(), (subenv.strip() or sub_env.strip()), urls, urlIndex, clusterid.strip(), pod.strip(), returnproxy.strip(), exitwithprocess, logger)
 
     if fixsignalablestates:
         rpcinterface.SupervisorNamespaceRPCInterface.signalProcess = signalProcessProperly
